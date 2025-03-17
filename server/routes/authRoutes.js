@@ -11,6 +11,6 @@ router.post('/register', register);
 router.post('/login', login);
 
 // Logout route
-router.post('/logout', authMiddleware.verifyToken, logout);
+router.post('/logout', authMiddleware, logout);
 
 export default router;

@@ -1,33 +1,32 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-const auth = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from cookies
-    const token = req.cookies.jwt;
+    // Get token from cookies or headers
+    const token = req.cookies?.jwt || req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
     // Verify token
-    const verifyUser = jwt.verify(token, process.env.JWT_SECRET);  // JWT verification using the secret key from environment variables
-    console.log(`Token verified for user: ${verifyUser._id}`);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(`Token verified for user: ${decoded._id}`);
 
     // Find user by ID in the database
-    const user = await Register.findOne({ _id: verifyUser._id });
+    const user = await User.findById(decoded._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Attach the user and token to the request object
-    req.token = token;
+    // Attach user object to the request
     req.user = user;
 
-    next(); // Call the next middleware or route handler
-
+    next(); // Proceed to the next middleware or route
   } catch (error) {
     console.error(`Authentication error: ${error.message}`);
     res.status(401).json({ message: 'Unauthorized access', error: error.message });
   }
 };
 
-export default auth;
+export default authMiddleware;

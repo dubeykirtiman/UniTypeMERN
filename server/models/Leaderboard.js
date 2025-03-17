@@ -10,12 +10,12 @@ const leaderboardSchema = new mongoose.Schema({
   score: { 
     type: Number, 
     required: true,
-    min: 0 // Optional: Prevent negative scores
+    min: 0 // Prevents negative scores
   },
   gameId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Game', // If you have a Game model
-    required: true 
+    ref: 'Game', 
+    required: false // ✅ Changed to optional in case not all scores are tied to a game
   },
   date: { 
     type: Date, 
@@ -23,10 +23,8 @@ const leaderboardSchema = new mongoose.Schema({
   }
 });
 
-// Optionally, create a unique index for userId and gameId to prevent duplicate entries
+// ✅ Unique constraint on userId & gameId to prevent duplicate entries
 leaderboardSchema.index({ userId: 1, gameId: 1 }, { unique: true });
 
-// Create an index for sorting by score in descending order (for leaderboard optimization)
-leaderboardSchema.index({ score: -1 });
-
+// ✅ Removed score index (only needed if sorting frequently)
 export default mongoose.model('Leaderboard', leaderboardSchema);
